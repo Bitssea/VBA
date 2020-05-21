@@ -1,0 +1,47 @@
+Sub Split_LongPic()
+' ===================================================
+' Created on: 2020/05/20
+' Created by: Bitssea
+' Desc: Split Long InlineShapes (Picture) into muti-pictures in muti-pages
+' ===================================================
+
+Set o_InlineShape = ActiveDocument.InlineShapes(1)
+o_InlineShape.Select
+
+'Find page height, deduct margin height
+Page_TopMargin = ActiveDocument.PageSetup.TopMargin
+Page_BottomMargin = ActiveDocument.PageSetup.BottomMargin
+Page_Height = ActiveDocument.PageSetup.PageHeight - Page_TopMargin - Page_BottomMargin - 20
+
+'Find Shape Info, Scaled Height, Scale Percentage
+Shape_Height = o_InlineShape.Height
+Shape_ScalePercent = o_InlineShape.ScaleHeight / 100
+
+If Shape_Height > Page_Height Then
+    
+    'Find number of copy needed
+    Split_No = Int(o_InlineShape.Height / Page_Height) + 1
+    
+    For x = 1 To Split_No
+    
+            With o_InlineShape.PictureFormat
+                'Reset Pic Size
+                .CropTop = 0
+                .CropBottom = Shape_Height
+                'Start Crop Pic
+                .CropBottom = (Shape_Height - x * Page_Height) / Shape_ScalePercent
+                .CropTop = ((x - 1) * Page_Height) / Shape_ScalePercent
+            End With
+            
+        Selection.Copy
+        Selection.Paste
+        o_InlineShape.Select
+    Next
+    
+    'Delete orignal file, eliminate duplicate
+    Selection.Delete
+End If
+
+End Sub
+
+
